@@ -5,7 +5,197 @@ let pinnedRecipes = [];
 let currentFilter = 'all';
 let currentMethod = '';
 let currentBuff = '';
+let currentSearchQuery = '';
 let allIngredients = new Set();
+
+// ==================== ADVANCED SEARCH PARSER ====================
+
+// Tokenize the search query
+function tokenizeSearch(query) {
+  const tokens = [];
+  let current = '';
+  let inParens = 0;
+
+  for (let i = 0; i < query.length; i++) {
+    const char = query[i];
+
+    if (char === '(') {
+      if (current.trim()) {
+        tokens.push({ type: 'TERM', value: current.trim() });
+        current = '';
+      }
+      tokens.push({ type: 'LPAREN', value: '(' });
+      inParens++;
+    } else if (char === ')') {
+      if (current.trim()) {
+        tokens.push({ type: 'TERM', value: current.trim() });
+        current = '';
+      }
+      tokens.push({ type: 'RPAREN', value: ')' });
+      inParens--;
+    } else if (char === ' ' && inParens === 0) {
+      if (current.trim()) {
+        tokens.push({ type: 'TERM', value: current.trim() });
+        current = '';
+      }
+    } else {
+      current += char;
+    }
+  }
+
+  if (current.trim()) {
+    tokens.push({ type: 'TERM', value: current.trim() });
+  }
+
+  return tokens;
+}
+
+// Parse a search term into field and value
+function parseSearchTerm(term) {
+  // Replace underscores with spaces
+  term = term.replace(/_/g, ' ');
+
+  // Check for NOT operator
+  const isNegated = term.startsWith('-');
+  if (isNegated) {
+    term = term.substring(1);
+  }
+
+  // Check for field:value syntax
+  const colonIndex = term.indexOf(':');
+  let field = 'name';
+  let value = term;
+
+  if (colonIndex > 0) {
+    field = term.substring(0, colonIndex).trim();
+    value = term.substring(colonIndex + 1).trim();
+  }
+
+  return { field, value, isNegated };
+}
+
+// Check if a recipe matches a search term
+function recipeMatchesTerm(recipe, term) {
+  const { field, value, isNegated } = parseSearchTerm(term);
+  const searchValue = value.toLowerCase();
+  let matches = false;
+
+  switch (field) {
+    case 'name':
+      matches = recipe.name.toLowerCase().includes(searchValue);
+      break;
+    case 'buff':
+      matches = recipe.buff.toLowerCase().includes(searchValue);
+      break;
+    case 'buff desc':
+    case 'buff description':
+      const buffDesc = buffDescriptions[recipe.buff] || '';
+      matches = buffDesc.toLowerCase().includes(searchValue);
+      break;
+    case 'ingredients':
+    case 'ingredient':
+      matches = recipe.ingredients.some(ing => ing.toLowerCase().includes(searchValue));
+      break;
+    case 'method':
+      matches = recipe.cookingMethod.toLowerCase().includes(searchValue);
+      break;
+    default:
+      // If field not recognized, search in name
+      matches = recipe.name.toLowerCase().includes(searchValue);
+  }
+
+  return isNegated ? !matches : matches;
+}
+
+// Evaluate a group of tokens (handles OR and AND)
+function evaluateTokenGroup(recipe, tokens) {
+  if (tokens.length === 0) return true;
+
+  // Split by OR operator (||)
+  const orGroups = [];
+  let currentGroup = [];
+
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i];
+    if (token.type === 'TERM' && token.value === '||') {
+      if (currentGroup.length > 0) {
+        orGroups.push(currentGroup);
+        currentGroup = [];
+      }
+    } else {
+      currentGroup.push(token);
+    }
+  }
+  if (currentGroup.length > 0) {
+    orGroups.push(currentGroup);
+  }
+
+  // Each OR group must have at least one match (OR logic)
+  for (const group of orGroups) {
+    if (evaluateAndGroup(recipe, group)) {
+      return true;
+    }
+  }
+
+  return orGroups.length === 0;
+}
+
+// Evaluate an AND group (all terms must match)
+function evaluateAndGroup(recipe, tokens) {
+  let i = 0;
+
+  while (i < tokens.length) {
+    const token = tokens[i];
+
+    if (token.type === 'LPAREN') {
+      // Find matching closing paren
+      let depth = 1;
+      let j = i + 1;
+      const innerTokens = [];
+
+      while (j < tokens.length && depth > 0) {
+        if (tokens[j].type === 'LPAREN') depth++;
+        else if (tokens[j].type === 'RPAREN') depth--;
+
+        if (depth > 0) {
+          innerTokens.push(tokens[j]);
+        }
+        j++;
+      }
+
+      // Recursively evaluate the group
+      if (!evaluateTokenGroup(recipe, innerTokens)) {
+        return false;
+      }
+
+      i = j;
+    } else if (token.type === 'TERM') {
+      // Skip AND operator (+)
+      if (token.value === '+') {
+        i++;
+        continue;
+      }
+
+      // Evaluate the term
+      if (!recipeMatchesTerm(recipe, token.value)) {
+        return false;
+      }
+      i++;
+    } else {
+      i++;
+    }
+  }
+
+  return true;
+}
+
+// Main search function
+function recipeMatchesAdvancedSearch(recipe, query) {
+  if (!query || query.trim() === '') return true;
+
+  const tokens = tokenizeSearch(query);
+  return evaluateTokenGroup(recipe, tokens);
+}
 
 // Generate random pastel color
 function generatePastelColor() {
@@ -52,11 +242,26 @@ function initRecipesPage() {
     buffFilter.addEventListener('change', handleBuffChange);
   }
 
+  const recipeSearchInput = document.getElementById('recipeSearch');
+  const clearRecipeSearchBtn = document.getElementById('clearRecipeSearch');
+  if (recipeSearchInput) {
+    recipeSearchInput.addEventListener('input', handleRecipeSearch);
+  }
+  if (clearRecipeSearchBtn) {
+    clearRecipeSearchBtn.addEventListener('click', clearRecipeSearch);
+  }
+
   if (Object.keys(inventory).length > 0) {
     renderInventory();
   }
 
   renderRecipes();
+
+  // Initialize tooltips for help button
+  const helpBtn = document.querySelector('.search-help-btn');
+  if (helpBtn) {
+    new bootstrap.Tooltip(helpBtn);
+  }
 
   // Handle window resize to reset expanded state when switching from mobile to desktop
   let resizeTimer;
@@ -147,6 +352,28 @@ function handleMethodClick(e) {
 
 function handleBuffChange(e) {
   currentBuff = e.target.value;
+  renderRecipes();
+}
+
+function handleRecipeSearch(e) {
+  currentSearchQuery = e.target.value.trim();
+  const clearBtn = document.getElementById('clearRecipeSearch');
+  if (clearBtn) {
+    clearBtn.style.display = currentSearchQuery ? 'block' : 'none';
+  }
+  renderRecipes();
+}
+
+function clearRecipeSearch() {
+  const searchInput = document.getElementById('recipeSearch');
+  if (searchInput) {
+    searchInput.value = '';
+    currentSearchQuery = '';
+  }
+  const clearBtn = document.getElementById('clearRecipeSearch');
+  if (clearBtn) {
+    clearBtn.style.display = 'none';
+  }
   renderRecipes();
 }
 
@@ -302,6 +529,60 @@ function canMakeRecipe(recipe) {
   return { hasAll, hasSome };
 }
 
+function groupIngredientCounts(ingredients) {
+  const counts = {};
+  ingredients.forEach(ing => {
+    counts[ing] = (counts[ing] || 0) + 1;
+  });
+  return counts;
+}
+
+function getIngredientColor(index) {
+  const colors = [
+    'rgb(255, 107, 107)', // Red
+    'rgb(255, 184, 77)',  // Orange
+    'rgb(255, 234, 167)', // Yellow
+    'rgb(119, 221, 119)', // Green
+    'rgb(84, 160, 255)',  // Blue
+    'rgb(162, 155, 254)', // Purple
+    'rgb(255, 121, 198)', // Pink
+    'rgb(118, 239, 239)', // Cyan
+  ];
+  return colors[index % colors.length];
+}
+
+function getPastelColor(index) {
+  const colors = [
+    'hsl(10, 85%, 75%)',   // Pastel Red
+    'hsl(30, 85%, 75%)',   // Pastel Orange
+    'hsl(50, 85%, 75%)',   // Pastel Yellow
+    'hsl(120, 60%, 75%)',  // Pastel Green
+    'hsl(200, 85%, 75%)',  // Pastel Blue
+    'hsl(270, 70%, 78%)',  // Pastel Purple
+    'hsl(330, 85%, 80%)',  // Pastel Pink
+    'hsl(180, 70%, 75%)',  // Pastel Cyan
+    'hsl(150, 60%, 75%)',  // Pastel Mint
+    'hsl(280, 65%, 78%)',  // Pastel Lavender
+  ];
+  return colors[index % colors.length];
+}
+
+function getMultiColorGradient(index) {
+  const gradients = [
+    'linear-gradient(135deg, #FF1744, #FF6F00, #FDD835)',  // Bright Red-Orange-Yellow
+    'linear-gradient(135deg, #D500F9, #651FFF, #FF4081)',  // Magenta-Purple-Pink
+    'linear-gradient(135deg, #FFEA00, #FF9100, #FF1744)',  // Yellow-Orange-Red
+    'linear-gradient(135deg, #F50057, #D500F9, #FFAB00)',  // Pink-Magenta-Amber
+    'linear-gradient(135deg, #AA00FF, #FF1744, #FFAB00)',  // Purple-Red-Gold
+    'linear-gradient(135deg, #FF6F00, #D500F9, #FF1744)',  // Orange-Magenta-Red
+    'linear-gradient(135deg, #FFAB00, #F50057, #AA00FF)',  // Gold-Pink-Purple
+    'linear-gradient(135deg, #FF1744, #FFEA00, #FF6F00)',  // Red-Yellow-Orange
+    'linear-gradient(135deg, #651FFF, #F50057, #FDD835)',  // Purple-Pink-Yellow
+    'linear-gradient(135deg, #FF9100, #AA00FF, #FF4081)',  // Orange-Purple-Pink
+  ];
+  return gradients[index % gradients.length];
+}
+
 function toggleRecipeCard(event, recipeName) {
   event.stopPropagation();
 
@@ -346,6 +627,11 @@ function renderRecipes() {
 
   let filtered = recipes;
 
+  // Apply advanced search filter
+  if (currentSearchQuery) {
+    filtered = filtered.filter(r => recipeMatchesAdvancedSearch(r, currentSearchQuery));
+  }
+
   // Apply quick filter
   if (currentFilter === 'pinned') {
     filtered = filtered.filter(r => pinnedRecipes.includes(r.name));
@@ -385,10 +671,19 @@ function renderRecipes() {
   const recipesContainer = document.getElementById('recipesContainer');
 
   if (filtered.length === 0) {
+    let emptyMessage = 'No recipes found';
+    if (currentSearchQuery) {
+      emptyMessage = `No recipes found matching "${currentSearchQuery}"`;
+    } else if (currentFilter === 'pinned') {
+      emptyMessage = 'No pinned recipes';
+    } else if (currentFilter === 'canMake') {
+      emptyMessage = 'No recipes you can make with current inventory';
+    }
+
     recipesContainer.innerHTML = `
       <div class="empty-state">
         <i class="fas fa-search"></i>
-        <p>No recipes found</p>
+        <p>${emptyMessage}</p>
       </div>`;
     return;
   }
@@ -432,13 +727,15 @@ function renderRecipes() {
     const methodIcons = {
       'soup': '<i class="fas fa-mug-hot"></i>',
       'frying': '<i class="fas fa-utensils"></i>',
-      'oven': '<i class="fas fa-bread-slice"></i>'
+      'oven': '<i class="fas fa-bread-slice"></i>',
+      'chef': '<i class="fas fa-hat-chef"></i>'
     };
     const methodIcon = methodIcons[recipe.cookingMethod] || '';
     const methodNames = {
       'soup': 'Soup',
       'frying': 'Frying',
-      'oven': 'Oven'
+      'oven': 'Oven',
+      'chef': "Chef's Counter"
     };
     const methodName = methodNames[recipe.cookingMethod] || '';
 
@@ -477,13 +774,91 @@ function renderRecipes() {
             </div>
             <div class="mb-2">
               <strong>Ingredients:</strong>
-              ${recipe.ingredients.map(ing =>
-        `<span class="ingredient-tag ${inventory[ing] ? 'in-inventory' : ''}"
-                    onclick="addToInventory('${ing}'); event.stopPropagation();">
-                ${getImageTag('ingredients', ing, 'ingredient-img')}${ing}
-              </span>`
-      ).join('')}
+              ${Object.entries(groupIngredientCounts(recipe.ingredients)).map(([ing, count]) => {
+                const hasSubRecipe = recipe.subRecipe && recipe.subRecipe.name === ing;
+                const borderStyle = hasSubRecipe ? `class="gradient-border-wrapper" style="background: ${getMultiColorGradient(0)}; padding: 3px; display: inline-block; width: fit-content; height: fit-content; border-radius: 30px;"` : '';
+
+                // Special handling for "Any Raw Fish Filet"
+                if (ing === "Any Raw Fish Filet") {
+                  return `<span class="ingredient-tag" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); position: relative;"
+                                data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="Can use: Chordfish, Portal Fish, Radfish, Inkfish, Moon Fish, Frigid Queenfish, or Silken Betta Filet">
+                      ${getImageTag('ingredients', ing, 'ingredient-img')}${ing} ${count > 1 ? `<span class="ingredient-count">x${count}</span>` : ''}
+                    </span>`;
+                }
+
+                return hasSubRecipe ?
+                  `<span ${borderStyle}>
+                    <span class="ingredient-tag ${inventory[ing] ? 'in-inventory' : ''}" style="margin: 0;"
+                          onclick="addToInventory('${ing}'); event.stopPropagation();">
+                      ${getImageTag('ingredients', ing, 'ingredient-img')}${ing} ${count > 1 ? `<span class="ingredient-count">x${count}</span>` : ''}
+                    </span>
+                  </span>` :
+                  `<span class="ingredient-tag ${inventory[ing] ? 'in-inventory' : ''}"
+                          onclick="addToInventory('${ing}'); event.stopPropagation();">
+                      ${getImageTag('ingredients', ing, 'ingredient-img')}${ing} ${count > 1 ? `<span class="ingredient-count">x${count}</span>` : ''}
+                    </span>`;
+              }).join('')}
             </div>
+            ${recipe.subRecipe ? `
+            <div class="sub-recipe-card mb-2" style="background: ${getMultiColorGradient(0)}; padding: 3px; display: block; width: fit-content; height: fit-content; border-radius: 30px;">
+              <div style="background: rgb(24, 44, 76); border-radius: 27px; padding: 0.75rem;">
+                <div class="sub-recipe-header">
+                  <i class="fas fa-layer-group"></i> <strong>Sub-Recipe: ${recipe.subRecipe.name}</strong>
+                </div>
+                <div class="sub-recipe-body">
+                  ${(() => {
+                    const ingredientsWithSubs = Object.keys(groupIngredientCounts(recipe.subRecipe.ingredients))
+                      .filter(ing => ingredientRecipes[ing] && ingredientRecipes[ing].ingredients.length > 0);
+                    const colorMap = {};
+                    ingredientsWithSubs.forEach((ing, idx) => {
+                      colorMap[ing] = idx + 1;
+                    });
+
+                    const ingredientsHTML = Object.entries(groupIngredientCounts(recipe.subRecipe.ingredients)).map(([ing, count]) => {
+                      const hasSubRecipe = colorMap[ing];
+                      const borderStyle = hasSubRecipe ? `class="gradient-border-wrapper" style="background: ${getMultiColorGradient(hasSubRecipe)}; padding: 3px; display: inline-block; width: fit-content; height: fit-content; border-radius: 30px;"` : '';
+                      return hasSubRecipe ?
+                        `<span ${borderStyle}>
+                          <span class="ingredient-tag ${inventory[ing] ? 'in-inventory' : ''}" style="margin: 0;"
+                                  onclick="addToInventory('${ing}'); event.stopPropagation();">
+                              ${getImageTag('ingredients', ing, 'ingredient-img')}${ing} ${count > 1 ? `<span class="ingredient-count">x${count}</span>` : ''}
+                            </span>
+                        </span>` :
+                        `<span class="ingredient-tag ${inventory[ing] ? 'in-inventory' : ''}"
+                                onclick="addToInventory('${ing}'); event.stopPropagation();">
+                            ${getImageTag('ingredients', ing, 'ingredient-img')}${ing} ${count > 1 ? `<span class="ingredient-count">x${count}</span>` : ''}
+                          </span>`;
+                    }).join('');
+
+                    const subRecipesHTML = ingredientsWithSubs.map((ing, idx) => {
+                      const subSubRecipe = ingredientRecipes[ing];
+                      const gradientIndex = colorMap[ing];
+                      return `
+                      <div class="sub-sub-recipe-card" style="background: ${getMultiColorGradient(gradientIndex)}; padding: 3px; display: block; width: fit-content; height: fit-content; border-radius: 30px;">
+                        <div style="background: rgb(24, 44, 76); border-radius: 27px; padding: 0.5rem;">
+                          <div class="sub-sub-recipe-header">
+                            <i class="fas fa-layer-group"></i> <strong>${subSubRecipe.name}</strong>
+                          </div>
+                          <div class="sub-sub-recipe-body">
+                            ${Object.entries(groupIngredientCounts(subSubRecipe.ingredients)).map(([subIng, subCount]) =>
+                              `<span class="ingredient-tag ${inventory[subIng] ? 'in-inventory' : ''}"
+                                        onclick="addToInventory('${subIng}'); event.stopPropagation();">
+                                    ${getImageTag('ingredients', subIng, 'ingredient-img')}${subIng} ${subCount > 1 ? `<span class="ingredient-count">x${subCount}</span>` : ''}
+                                  </span>`
+                            ).join('')}
+                          </div>
+                        </div>
+                      </div>
+                      `;
+                    }).join('');
+
+                    return `<div class="sub-recipe-ingredients">${ingredientsHTML}</div>${subRecipesHTML}`;
+                  })()}
+                </div>
+              </div>
+            </div>
+            ` : ''}
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 <span class="stat-display">

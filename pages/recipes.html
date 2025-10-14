@@ -26,6 +26,7 @@
               <button class="method-btn" data-method="soup"><i class="fas fa-mug-hot"></i> Soups</button>
               <button class="method-btn" data-method="frying"><i class="fas fa-utensils"></i> Frying</button>
               <button class="method-btn" data-method="oven"><i class="fas fa-bread-slice"></i> Oven</button>
+              <button class="method-btn" data-method="chef"><i class="fas fa-hat-chef"></i> Chef's Counter</button>
             </div>
           </div>
 
@@ -63,7 +64,35 @@
         <div class="card-header">
           <h4 class="mb-0"><i class="fas fa-book"></i> All Recipes</h4>
         </div>
-        <div class="card-body" id="recipesContainer"></div>
+        <div class="card-body">
+          <div class="search-section mb-3">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <label class="mb-0" style="color: var(--secondary-color); font-weight: 600;">
+                <i class="fas fa-search"></i> Advanced Search
+              </label>
+              <button class="search-help-btn" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-html="true"
+                      title="<strong>Search Syntax:</strong><br>
+                      • Simple: <code>meaty</code><br>
+                      • Field: <code>buff_desc:xp</code><br>
+                      • NOT: <code>-buff_desc:xp</code><br>
+                      • AND: <code>meaty + soup</code><br>
+                      • OR: <code>meaty || stew</code><br>
+                      • Group: <code>(meaty -buff_desc:xp)</code><br>
+                      <small>Fields: name, buff, buff_desc, ingredients, method<br>
+                      Use _ for spaces</small>">
+                <i class="fas fa-question-circle"></i>
+              </button>
+            </div>
+            <div class="position-relative">
+              <input type="text" class="form-control search-input" id="recipeSearch"
+                     placeholder="Try: meaty || buff_desc:strength">
+              <button class="clear-search-btn" id="clearRecipeSearch" style="display: none;" title="Clear search">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+          <div id="recipesContainer"></div>
+        </div>
       </div>
     </div>
 

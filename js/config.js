@@ -1,3 +1,37 @@
+// ==================== INGREDIENT SUB-RECIPES ====================
+const ingredientRecipes = {
+  "Raw Dough": {
+    name: "Raw Dough",
+    ingredients: ["Anteverse Wheat", "Anteverse Wheat", "Milk Sac"]
+  },
+  "Raw Peccary Sausages": {
+    name: "Raw Peccary Sausages",
+    ingredients: ["Raw Peccary Chop", "Raw Peccary Chop", "Bio Scrap", "Salt"]
+  },
+  "Anteverse Cheese": {
+    name: "Anteverse Cheese",
+    ingredients: [], // Complex process - not shown
+    note: "Created via complex cheese-making process"
+  },
+  "Fish Oil": {
+    name: "Fish Oil",
+    ingredients: [], // Not craftable
+    note: "Obtained by butchering fish"
+  },
+  "Bowl of Xanterium Rice": {
+    name: "Bowl of Xanterium Rice",
+    ingredients: ["Xanterium Rice"]
+  },
+  "Cooked Gutfish Eel Filet": {
+    name: "Cooked Gutfish Eel Filet",
+    ingredients: ["Raw Gutfish Eel Filet"]
+  },
+  "Ice Cream": {
+    name: "Ice Cream",
+    ingredients: ["Egg", "Milk Sac", "Gem Sugar"]
+  }
+};
+
 // ==================== BUFF DESCRIPTIONS ====================
 const buffDescriptions = {
   "Souper Satisfied": "Basic soup buff. Provides standard hunger and thirst restoration.",
@@ -14,7 +48,10 @@ const buffDescriptions = {
   "Sweet Tooth": "Gives extra boost to hunger and thirst bars when eating vending machine snacks.",
   "Sugar High": "Increases stamina temporarily but makes you tire easily and need bathroom more often.",
   "Well Fed": "Provides sustained energy and health regeneration.",
-  "Energized": "Increases stamina regeneration rate."
+  "Energized": "Increases stamina regeneration rate.",
+  "King of Carbuncles": "Special buff from Carbuncle Casserole. Effects unknown - may relate to Carbuncle interactions.",
+  "Fish Out of Water": "Special buff from Crumbed Darkwater Fish. Effects unknown - may provide water-related benefits.",
+  "Slice of Home": "Special buff from Apple Pie. Provides comfort and nostalgic benefits."
 };
 
 // ==================== IMAGE CONFIGURATION ====================
@@ -60,7 +97,28 @@ const imageUrls = {
     "Melted Ice Cream": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Melted_Ice_Cream.png/64px-Item_Icon_-_Melted_Ice_Cream.png?e00ceb",
     "Doznuts": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Doznuts.png/64px-Item_Icon_-_Doznuts.png?5a23fc",
     "Jowlers": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Jowlers.png/64px-Item_Icon_-_Jowlers.png?acf8b9",
-    "Skip": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Skip.png/64px-Item_Icon_-_Skip.png?b854be"
+    "Skip": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Skip.png/64px-Item_Icon_-_Skip.png?b854be",
+    "Anteverse Wheat": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Anteverse_Wheat.png/64px-Item_Icon_-_Anteverse_Wheat.png?88dfd6",
+    "Bio Scrap": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Bio_Scrap.png/64px-Item_Icon_-_Bio_Scrap.png?a1b2c3",
+    "Bowl of Xanterium Rice": "https://abioticfactor.wiki.gg/images/thumb/Itemicon_ricebowl.png/64px-Itemicon_ricebowl.png?1234ab",
+    "Roasted Nori Sheet": "https://abioticfactor.wiki.gg/images/thumb/Itemicon_norisheet.png/64px-Itemicon_norisheet.png?5678cd",
+    "Gem Crab": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Gem_Crab.png/64px-Item_Icon_-_Gem_Crab.png?abcdef",
+    "Opal Crab": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Opal_Crab.png/64px-Item_Icon_-_Opal_Crab.png?fedcba",
+    "Cooked Gutfish Eel Filet": "https://abioticfactor.wiki.gg/images/thumb/Itemicon_filet_gutfish_cooked.png/64px-Itemicon_filet_gutfish_cooked.png?123456",
+    "Raw Gutfish Eel Filet": "https://abioticfactor.wiki.gg/images/thumb/Itemicon_filet_gutfish_raw.png/64px-Itemicon_filet_gutfish_raw.png?654321",
+    "Gem Sugar": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Gem_Sugar.png/64px-Item_Icon_-_Gem_Sugar.png?aabbcc",
+    "Ice Cream": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Ice_Cream.png/64px-Item_Icon_-_Ice_Cream.png?ccbbaa",
+    "Honey": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Honey.png/64px-Item_Icon_-_Honey.png?112233",
+    "Apple": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Apple.png/64px-Item_Icon_-_Apple.png?332211",
+    "Shadowberries": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Shadowberries.png/64px-Item_Icon_-_Shadowberries.png?445566",
+    "Rootbear": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Rootbear.png/64px-Item_Icon_-_Rootbear.png?665544",
+    "Glow Tulip": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Glow_Tulip.png/64px-Item_Icon_-_Glow_Tulip.png?778899",
+    "Gooey Tulip": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Gooey_Tulip.png/64px-Item_Icon_-_Gooey_Tulip.png?998877",
+    "Space Lettuce": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Space_Lettuce.png/64px-Item_Icon_-_Space_Lettuce.png?aabbdd",
+    "Super Tomato": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Super_Tomato.png/64px-Item_Icon_-_Super_Tomato.png?ddbbaa",
+    "Crunchy Crystal": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Crunchy_Crystal.png/64px-Item_Icon_-_Crunchy_Crystal.png?eeffgg",
+    "Gem Crab": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Gem_Crab.png/64px-Item_Icon_-_Gem_Crab.png?ggffee",
+    "Any Raw Fish Filet": "https://abioticfactor.wiki.gg/images/thumb/Itemicon_filet_antefish_raw.png/64px-Itemicon_filet_antefish_raw.png?1f319e"
   },
   recipes: {}
 };
@@ -125,8 +183,50 @@ const recipes = [
   {name: "Cooked Frigid Queenfish Filet", ingredients: ["Raw Frigid Queenfish Filet"], hunger: 12, thirst: 0, cookingMethod: "frying", buff: "Well Fed"},
 
   // OVEN/BAKING
-  {name: "Bread", ingredients: ["Raw Dough"], hunger: 12, thirst: 5, cookingMethod: "oven", buff: "Energized"},
-  {name: "Pumpkin Bread", ingredients: ["Pumpkin", "Raw Dough"], hunger: 37, thirst: 5, cookingMethod: "oven", buff: "Energized"},
-  {name: "Baked Potato", ingredients: ["Potato"], hunger: 10, thirst: 3, cookingMethod: "oven", buff: "Energized"},
-  {name: "Roasted Pumpkin", ingredients: ["Pumpkin"], hunger: 20, thirst: 7, cookingMethod: "oven", buff: "Energized"}
+  {name: "Bread", ingredients: ["Raw Dough"], hunger: 12.5, thirst: 5, cookingMethod: "oven", buff: "Energized"},
+  {name: "Pumpkin Bread", ingredients: ["Raw Pumpkin Dough"], hunger: 37.5, thirst: 5, cookingMethod: "oven", buff: "Energized", subRecipe: {name: "Raw Pumpkin Dough", ingredients: ["Anteverse Wheat", "Anteverse Wheat", "Milk Sac", "Pumpkin"]}},
+  {name: "Cooked Baked Potato", ingredients: ["Potato"], hunger: 10, thirst: 3.75, cookingMethod: "oven", buff: "Energized"},
+  {name: "Cooked Pestato", ingredients: ["Raw Pestato"], hunger: 20.7, thirst: 3.45, cookingMethod: "oven", buff: "Energized", subRecipe: {name: "Raw Pestato", ingredients: ["Raw Pest Rump", "Potato"]}},
+  {name: "Cooked Fries", ingredients: ["Raw Fries"], hunger: 12.5, thirst: 3.75, cookingMethod: "oven", buff: "Energized", subRecipe: {name: "Raw Fries", ingredients: ["Potato", "Salt"]}},
+  {name: "Cooked Stuffed Roast Peccary", ingredients: ["Raw Stuffed Roast Peccary"], hunger: 63, thirst: 28.75, cookingMethod: "oven", buff: "Energized", subRecipe: {name: "Raw Stuffed Roast Peccary", ingredients: ["Raw Alien Drumstick", "Carbuncle Mushroom", "Greyeb", "Canned Peas"]}},
+  {name: "Simple Pest Pie", ingredients: ["Raw Simple Pest Pie"], hunger: 30, thirst: 0, cookingMethod: "oven", buff: "Energized", subRecipe: {name: "Raw Simple Pest Pie", ingredients: ["Raw Dough", "Raw Dough", "Raw Pest", "Raw Pest", "Raw Pest", "Raw Pest", "Raw Pest Rump", "Raw Pest Rump"]}},
+  {name: "Pest Pot Pie", ingredients: ["Raw Pest Pot Pie"], hunger: 22.75, thirst: 3.15, cookingMethod: "oven", buff: "Energized", subRecipe: {name: "Raw Pest Pot Pie", ingredients: ["Raw Dough", "Raw Dough", "Canned Peas", "Potato", "Potato", "Raw Pest Rump", "Raw Pest Rump", "Raw Pest Rump"]}},
+  {name: "Creepy Meat Pie", ingredients: ["Raw Creepy Meat Pie"], hunger: 21.5, thirst: 7.65, cookingMethod: "oven", buff: "Energized", subRecipe: {name: "Raw Creepy Meat Pie", ingredients: ["Raw Dough", "Raw Dough", "Greyeb", "Greyeb", "Carbuncle Mushroom", "Carbuncle Mushroom", "Raw Pest", "Raw Pest"]}},
+  {name: "Gumdrop Cookie", ingredients: ["Raw Gumdrop Cookie Tray"], hunger: 13, thirst: 5.175, cookingMethod: "oven", buff: "Energized", subRecipe: {name: "Raw Gumdrop Cookie Tray", ingredients: ["Egg", "Anteverse Wheat", "Anteverse Wheat", "Anteverse Wheat", "Melted Ice Cream", "Jowlers"]}},
+  {name: "Pumpkin Cookie", ingredients: ["Pumpkin"], hunger: 15.5, thirst: 4.725, cookingMethod: "oven", buff: "Energized"},
+  {name: "Pumpkin Pie", ingredients: ["Pumpkin"], hunger: 23, thirst: 6, cookingMethod: "oven", buff: "Energized"},
+  {name: "Apple Pie", ingredients: ["Apple"], hunger: 26.26, thirst: 8.775, cookingMethod: "oven", buff: "Slice of Home"},
+  {name: "Salted Honey Pie", ingredients: ["Salt", "Honey"], hunger: 32.5, thirst: 3.6, cookingMethod: "oven", buff: "Energized"},
+  {name: "Shadowberry Pie", ingredients: ["Shadowberries"], hunger: 28.25, thirst: 17.325, cookingMethod: "oven", buff: "Energized"},
+  {name: "Carbuncle Casserole", ingredients: ["Raw Carbuncle Casserole"], hunger: 16.5, thirst: 2.25, cookingMethod: "oven", buff: "King of Carbuncles", subRecipe: {name: "Raw Carbuncle Casserole", ingredients: ["Raw Carbuncle", "Raw Carbuncle", "Raw Carbuncle", "Potato", "Potato", "Carbuncle Mushroom", "Carbuncle Mushroom", "Anteverse Cheese"]}},
+  {name: "Pekkie Brekkie Hash", ingredients: ["Raw Pekkie Brekkie Hash"], hunger: 26.25, thirst: 6.75, cookingMethod: "oven", buff: "Energized", subRecipe: {name: "Raw Pekkie Brekkie Hash", ingredients: ["Egg", "Egg", "Egg", "Potato", "Potato", "Anteverse Cheese", "Anteverse Cheese", "Raw Peccary Sausages"]}},
+  {name: "Carbuncle Pizza", ingredients: ["Raw Carbuncle Pizza"], hunger: 12, thirst: 2.25, cookingMethod: "oven", buff: "Energized", subRecipe: {name: "Raw Carbuncle Pizza", ingredients: ["Raw Carbuncle", "Tomato", "Anteverse Cheese", "Raw Dough"]}},
+  {name: "Glowing Gâteau", ingredients: ["Raw Glowing Gâteau"], hunger: 18, thirst: 6.525, cookingMethod: "oven", buff: "Energized", subRecipe: {name: "Raw Glowing Gâteau", ingredients: ["Egg", "Egg", "Anteverse Wheat", "Anteverse Wheat", "Anteverse Wheat", "Anteverse Wheat", "Anteverse Wheat", "Anteverse Wheat", "Melted Ice Cream"]}},
+  {name: "Crumbed Darkwater Fish", ingredients: ["Raw Crumbed Darkwater Fish"], hunger: 21.75, thirst: 0, cookingMethod: "oven", buff: "Fish Out of Water", subRecipe: {name: "Raw Crumbed Darkwater Fish", ingredients: ["Raw Darkwater Fish Filet", "Anteverse Wheat", "Anteverse Wheat", "Anteverse Wheat", "Anteverse Wheat", "Anteverse Wheat", "Anteverse Wheat", "Anteverse Cheese"]}},
+  {name: "Roasted Nori Sheet", ingredients: ["Raw Nori Sheet Tray"], hunger: 17.5, thirst: 0, cookingMethod: "oven", buff: "Energized", subRecipe: {name: "Raw Nori Sheet Tray", ingredients: ["Murkweed", "Murkweed", "Murkweed", "Murkweed", "Murkweed", "Murkweed", "Murkweed", "Murkweed", "Murkweed", "Murkweed", "Murkweed", "Murkweed", "Fish Oil", "Salt"]}},
+
+  // CHEF'S COUNTER - Prepared Foods
+  {name: "Gooey Tulip Salad", ingredients: ["Gooey Tulip"], hunger: 15, thirst: 10, cookingMethod: "chef", buff: "Well Fed"},
+  {name: "Cooked Gooey Meat Steak", ingredients: ["Cooked Gooey Meat Steak", "Glow Tulip"], hunger: 18, thirst: 5, cookingMethod: "chef", buff: "Well Fed"},
+  {name: "Cosmato Salad Wrap", ingredients: ["Space Lettuce", "Tomato", "Greyeb"], hunger: 20, thirst: 12, cookingMethod: "chef", buff: "Well Fed"},
+
+  // SUSHI & NIGIRI
+  {name: "Penumbra Nigiri", ingredients: ["Raw Penumbra Filet", "Bowl of Xanterium Rice"], hunger: 16.25, thirst: 1.8, cookingMethod: "chef", buff: "Well Fed", subRecipe: {name: "Bowl of Xanterium Rice", ingredients: ["Xanterium Rice"]}},
+  {name: "Mushy Crab Sushi", ingredients: ["Gem Crab", "Carbuncle Mushroom", "Bowl of Xanterium Rice"], hunger: 16, thirst: 2.25, cookingMethod: "chef", buff: "Well Fed", subRecipe: {name: "Bowl of Xanterium Rice", ingredients: ["Xanterium Rice"]}},
+  {name: "Icebergiri", ingredients: ["Raw Frigid Queenfish Filet", "Bowl of Xanterium Rice"], hunger: 13.75, thirst: 1, cookingMethod: "chef", buff: "Well Fed", subRecipe: {name: "Bowl of Xanterium Rice", ingredients: ["Xanterium Rice"]}},
+  {name: "Gutfish Unagi", ingredients: ["Cooked Gutfish Eel Filet", "Bowl of Xanterium Rice"], hunger: 12.5, thirst: 1, cookingMethod: "chef", buff: "Well Fed", subRecipe: {name: "Bowl of Xanterium Rice", ingredients: ["Xanterium Rice"]}},
+  {name: "Fogiri", ingredients: ["Raw Chordfish Filet", "Bowl of Xanterium Rice"], hunger: 10, thirst: 1, cookingMethod: "chef", buff: "Well Fed", subRecipe: {name: "Bowl of Xanterium Rice", ingredients: ["Xanterium Rice"]}},
+
+  // MAKI
+  {name: "Antemaki", ingredients: ["Raw Antefish Filet", "Bowl of Xanterium Rice", "Roasted Nori Sheet"], hunger: 14, thirst: 1.5, cookingMethod: "chef", buff: "Well Fed", subRecipe: {name: "Bowl of Xanterium Rice", ingredients: ["Xanterium Rice"]}},
+  {name: "Colorful Maki Plate", ingredients: ["Any Raw Fish Filet", "Any Raw Fish Filet", "Bowl of Xanterium Rice", "Roasted Nori Sheet", "Roasted Nori Sheet"], hunger: 16, thirst: 2, cookingMethod: "chef", buff: "Well Fed", subRecipe: {name: "Bowl of Xanterium Rice", ingredients: ["Xanterium Rice"]}},
+  {name: "Rad Rice Bowl", ingredients: ["Cooked Radfish Filet", "Bowl of Xanterium Rice", "Egg", "Canned Peas", "Greyeb"], hunger: 22, thirst: 6, cookingMethod: "chef", buff: "Well Fed", subRecipe: {name: "Bowl of Xanterium Rice", ingredients: ["Xanterium Rice"]}},
+  {name: "Raw Fr-eyed Rice", ingredients: ["Raw Silken Betta Filet", "Bowl of Xanterium Rice", "Roasted Nori Sheet"], hunger: 20, thirst: 1.5, cookingMethod: "chef", buff: "Well Fed", subRecipe: {name: "Bowl of Xanterium Rice", ingredients: ["Xanterium Rice"]}},
+
+  // ICE CREAM & FROZEN TREATS
+  {name: "Ice Cream", ingredients: ["Egg", "Milk Sac", "Gem Sugar"], hunger: 12, thirst: 8, cookingMethod: "chef", buff: "Sweet Tooth"},
+  {name: "Honey Apple Ice Cream", ingredients: ["Ice Cream", "Honey", "Apple"], hunger: 18, thirst: 10, cookingMethod: "chef", buff: "Sweet Tooth", subRecipe: {name: "Ice Cream", ingredients: ["Egg", "Milk Sac", "Gem Sugar"]}},
+  {name: "Pumpkin Ice Cream", ingredients: ["Ice Cream", "Pumpkin"], hunger: 16, thirst: 9, cookingMethod: "chef", buff: "Sweet Tooth", subRecipe: {name: "Ice Cream", ingredients: ["Egg", "Milk Sac", "Gem Sugar"]}},
+  {name: "Shadowberry Milkshake", ingredients: ["Ice Cream", "Shadowberries"], hunger: 15, thirst: 12, cookingMethod: "chef", buff: "Sweet Tooth", subRecipe: {name: "Ice Cream", ingredients: ["Egg", "Milk Sac", "Gem Sugar"]}},
+  {name: "Rootbear Float", ingredients: ["Ice Cream", "Rootbear"], hunger: 14, thirst: 15, cookingMethod: "chef", buff: "Sweet Tooth", subRecipe: {name: "Ice Cream", ingredients: ["Egg", "Milk Sac", "Gem Sugar"]}}
 ];
