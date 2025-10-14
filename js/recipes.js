@@ -780,7 +780,8 @@ function renderRecipes() {
 
                 // Special handling for "Any Raw Fish Filet"
                 if (ing === "Any Raw Fish Filet") {
-                  return `<span class="ingredient-tag" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); position: relative;"
+                  return `<span class="ingredient-tag ${inventory[ing] ? 'in-inventory' : ''}"
+                                onclick="addToInventory('${ing}'); event.stopPropagation();"
                                 data-bs-toggle="tooltip" data-bs-placement="top"
                                 title="Can use: Chordfish, Portal Fish, Radfish, Inkfish, Moon Fish, Frigid Queenfish, or Silken Betta Filet">
                       ${getImageTag('ingredients', ing, 'ingredient-img')}${ing} ${count > 1 ? `<span class="ingredient-count">x${count}</span>` : ''}
