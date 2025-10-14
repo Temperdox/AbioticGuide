@@ -336,7 +336,6 @@ input {
 }
 
 .inventory-list {
-  max-height: 400px;
   overflow-y: auto;
 }
 
@@ -417,7 +416,6 @@ input {
 }
 
 .card:hover {
-  transform: translateY(-5px);
   box-shadow: 0 10px 40px rgba(52, 152, 219, 0.3);
 }
 
@@ -443,8 +441,7 @@ input {
 }
 
 .recipe-card:hover {
-  background: linear-gradient(135deg, rgba(52, 152, 219, 0.2), rgba(41, 128, 185, 0.2));
-  border-left-width: 6px;
+  background: linear-gradient(135deg, rgba(52, 152, 219, 0.4), rgba(41, 128, 185, 0.1));
 }
 
 .recipe-card.can-make {
@@ -460,6 +457,21 @@ input {
 .recipe-card.pinned {
   border: 3px solid #f39c12;
   background: linear-gradient(135deg, rgba(243, 156, 18, 0.15), rgba(230, 126, 34, 0.15));
+}
+
+.recipe-card.can-make:hover {
+  border-left-color: var(--success-color);
+  background: linear-gradient(135deg, rgba(39, 174, 96, 0.4), rgba(34, 153, 84, 0.1));
+}
+
+.recipe-card.partial-make:hover {
+  border-left-color: var(--warning-color);
+  background: linear-gradient(135deg, rgba(243, 156, 18, 0.25), rgba(230, 126, 34, 0.1));
+}
+
+.recipe-card.pinned:hover {
+  border: 3px solid #f39c12;
+  background: linear-gradient(135deg, rgba(243, 156, 18, 0.4), rgba(230, 126, 34, 0.1));
 }
 
 .pin-checkbox {
