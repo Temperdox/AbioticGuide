@@ -57,6 +57,22 @@ function initRecipesPage() {
   }
 
   renderRecipes();
+
+  // Handle window resize to reset expanded state when switching from mobile to desktop
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (window.innerWidth > 768) {
+        // Reset all expanded states on desktop
+        document.body.classList.remove('has-expanded-card');
+        document.querySelectorAll('.recipe-card').forEach(card => {
+          card.classList.remove('expanded', 'collapsed');
+          card.style.display = '';
+        });
+      }
+    }, 250);
+  });
 }
 
 function handleSearch(e) {
@@ -286,7 +302,48 @@ function canMakeRecipe(recipe) {
   return { hasAll, hasSome };
 }
 
+function toggleRecipeCard(event, recipeName) {
+  event.stopPropagation();
+
+  // Only enable accordion on mobile (768px or less)
+  if (window.innerWidth > 768) {
+    return;
+  }
+
+  const clickedCard = document.querySelector(`.recipe-card[data-recipe="${recipeName}"]`);
+  const allCards = document.querySelectorAll('.recipe-card');
+  const isCurrentlyExpanded = clickedCard.classList.contains('expanded');
+
+  // If clicking the currently expanded card, collapse it
+  if (isCurrentlyExpanded) {
+    clickedCard.classList.remove('expanded');
+    clickedCard.classList.add('collapsed');
+    document.body.classList.remove('has-expanded-card');
+
+    // Show all other cards again
+    allCards.forEach(card => {
+      if (card !== clickedCard) {
+        card.style.display = '';
+      }
+    });
+  } else {
+    // Collapse any currently expanded card
+    allCards.forEach(card => {
+      card.classList.remove('expanded');
+      card.classList.add('collapsed');
+    });
+
+    // Expand the clicked card
+    clickedCard.classList.remove('collapsed');
+    clickedCard.classList.add('expanded');
+    document.body.classList.add('has-expanded-card');
+  }
+}
+
 function renderRecipes() {
+  // Reset expanded state when re-rendering
+  document.body.classList.remove('has-expanded-card');
+
   let filtered = recipes;
 
   // Apply quick filter
@@ -386,49 +443,64 @@ function renderRecipes() {
     const methodName = methodNames[recipe.cookingMethod] || '';
 
     return `
-      <div class="recipe-card ${cardClass}">
+      <div class="recipe-card ${cardClass} collapsed" data-recipe="${recipe.name}">
         <button class="pin-checkbox ${isPinned ? 'pinned' : ''}"
-                onclick="togglePin('${recipe.name}')"
+                onclick="togglePin('${recipe.name}'); event.stopPropagation();"
                 title="${isPinned ? 'Unpin this recipe' : 'Pin this recipe'}">
           <i class="fas fa-thumbtack"></i>
         </button>
-        <div class="d-flex justify-content-between align-items-start mb-2">
-          <div class="d-flex align-items-center flex-wrap">
+        <div class="recipe-card-header" onclick="toggleRecipeCard(event, '${recipe.name}')">
+          <div class="recipe-card-header-content">
             ${getImageTag('recipes', recipe.name, 'recipe-img')}
-            <div>
-              <h5 class="mb-1">${recipe.name} ${statusIcon} ${countBadge}</h5>
+            <div style="flex: 1;">
+              <h5 class="mb-1">${recipe.name} ${statusIcon}</h5>
               <span class="badge method-badge">${methodIcon} ${methodName}</span>
+              ${countBadge}
             </div>
           </div>
-          <span class="badge buff-badge" data-bs-toggle="tooltip" data-bs-placement="left"
-                data-bs-html="true" title="<strong>${recipe.buff}</strong><br>${buffDesc}">
-            ${recipe.buff}
-          </span>
+          <i class="fas fa-chevron-down recipe-card-toggle"></i>
         </div>
-        <div class="mb-2">
-          <strong>Ingredients:</strong>
-          ${recipe.ingredients.map(ing =>
-      `<span class="ingredient-tag ${inventory[ing] ? 'in-inventory' : ''}"
-                  onclick="addToInventory('${ing}')">
-              ${getImageTag('ingredients', ing, 'ingredient-img')}${ing}
-            </span>`
-    ).join('')}
-        </div>
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <span class="stat-display">
-              <i class="fas fa-drumstick-bite stat-icon"></i>
-              <strong>Hunger:</strong> ${recipe.hunger}
-            </span>
-            <span class="stat-display">
-              <i class="fas fa-tint stat-icon"></i>
-              <strong>Thirst:</strong> ${recipe.thirst}
-            </span>
+        <div class="recipe-card-body">
+          <div class="recipe-card-content">
+            <div class="d-flex justify-content-between align-items-start mb-2 desktop-header">
+              <div class="d-flex align-items-center flex-wrap">
+                ${getImageTag('recipes', recipe.name, 'recipe-img')}
+                <div>
+                  <h5 class="mb-1">${recipe.name} ${statusIcon} ${countBadge}</h5>
+                  <span class="badge method-badge">${methodIcon} ${methodName}</span>
+                </div>
+              </div>
+              <span class="badge buff-badge" data-bs-toggle="tooltip" data-bs-placement="left"
+                    data-bs-html="true" title="<strong>${recipe.buff}</strong><br>${buffDesc}">
+                ${recipe.buff}
+              </span>
+            </div>
+            <div class="mb-2">
+              <strong>Ingredients:</strong>
+              ${recipe.ingredients.map(ing =>
+        `<span class="ingredient-tag ${inventory[ing] ? 'in-inventory' : ''}"
+                    onclick="addToInventory('${ing}'); event.stopPropagation();">
+                ${getImageTag('ingredients', ing, 'ingredient-img')}${ing}
+              </span>`
+      ).join('')}
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <span class="stat-display">
+                  <i class="fas fa-drumstick-bite stat-icon"></i>
+                  <strong>Hunger:</strong> ${recipe.hunger}
+                </span>
+                <span class="stat-display">
+                  <i class="fas fa-tint stat-icon"></i>
+                  <strong>Thirst:</strong> ${recipe.thirst}
+                </span>
+              </div>
+              <button class="craft-btn" onclick="craftRecipe('${recipe.name}'); event.stopPropagation();"
+                      ${!status.hasAll ? 'disabled' : ''}>
+                <i class="fas fa-fire" style="color: #e66205"></i> Craft Recipe
+              </button>
+            </div>
           </div>
-          <button class="craft-btn" onclick="craftRecipe('${recipe.name}')"
-                  ${!status.hasAll ? 'disabled' : ''}>
-            <i class="fas fa-fire" style="color: #e66205"></i> Craft Recipe
-          </button>
         </div>
       </div>
     `;
