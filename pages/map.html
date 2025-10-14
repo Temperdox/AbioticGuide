@@ -1,0 +1,214 @@
+<div class="container-fluid mt-4">
+
+  <div class="row">
+    <div class="col-lg-3 mb-3">
+      <div class="map-controls">
+        <h5><i class="fas fa-map-marked-alt"></i> Map Selection</h5>
+        <select id="mapSelector" class="form-select map-selector mb-3">
+          <option value="">Loading maps...</option>
+        </select>
+        <hr>
+        <h5><i class="fas fa-filter"></i> Filters</h5>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="showItems" checked>
+          <label class="form-check-label" for="showItems">
+            <i class="fas fa-box"></i> Items & Resources
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="showEnemies" checked>
+          <label class="form-check-label" for="showEnemies">
+            <i class="fas fa-skull-crossbones"></i> Enemies
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="showLocations" checked>
+          <label class="form-check-label" for="showLocations">
+            <i class="fas fa-map-pin"></i> Key Locations
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="showNPCs" checked>
+          <label class="form-check-label" for="showNPCs">
+            <i class="fas fa-user"></i> NPCs & Traders
+          </label>
+        </div>
+        <hr>
+        <button class="btn btn-sm btn-secondary w-100 mb-2" id="resetView">
+          <i class="fas fa-sync-alt"></i> Reset View
+        </button>
+        <button class="btn btn-sm btn-warning w-100" id="exportMarkers">
+          <i class="fas fa-download"></i> Save Markers to File
+        </button>
+      </div>
+    </div>
+
+    <div class="col-lg-9">
+      <div class="map-container">
+        <div id="interactive-map"></div>
+        <div class="map-loading" id="mapLoading">
+          <i class="fas fa-spinner fa-spin"></i> Loading map...
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Context Menu -->
+<div class="map-context-menu" id="mapContextMenu">
+  <button class="context-menu-item" data-action="add-marker">
+    <i class="fas fa-map-pin"></i> Add Marker
+  </button>
+  <button class="context-menu-item danger" data-action="remove-marker" id="removeMarkerOption" style="display: none;">
+    <i class="fas fa-trash-alt"></i> Remove This Marker
+  </button>
+  <div class="context-menu-separator"></div>
+  <button class="context-menu-item" data-action="add-home">
+    <i class="fas fa-home"></i> Add Home Base
+  </button>
+  <button class="context-menu-item" data-action="add-friend">
+    <i class="fas fa-user-friends"></i> Add Friend Base
+  </button>
+  <div class="context-menu-separator"></div>
+  <button class="context-menu-item" data-action="directions">
+    <i class="fas fa-route"></i> Get Directions
+  </button>
+  <div class="context-menu-separator"></div>
+  <button class="context-menu-item danger" data-action="remove-this-home" id="removeThisHomeOption" style="display: none;">
+    <i class="fas fa-trash-alt"></i> Delete This Home
+  </button>
+  <button class="context-menu-item danger" data-action="remove-home">
+    <i class="fas fa-trash"></i> Remove Home Markers
+  </button>
+</div>
+
+<!-- Friend Base Name Modal -->
+<div class="custom-modal" id="friendBaseModal">
+  <div class="custom-modal-content">
+    <h5 class="custom-modal-header">
+      <i class="fas fa-user-friends"></i> Name Friend's Base
+    </h5>
+    <div class="custom-modal-body">
+      <input type="text" id="friendBaseName" placeholder="Enter friend's name..." maxlength="30">
+    </div>
+    <div class="custom-modal-footer">
+      <button class="modal-btn modal-btn-secondary" id="friendBaseCancel">Cancel</button>
+      <button class="modal-btn modal-btn-primary" id="friendBaseConfirm">Add Marker</button>
+    </div>
+  </div>
+</div>
+
+<!-- Marker Type Selection Modal -->
+<div class="custom-modal" id="markerTypeModal">
+  <div class="custom-modal-content marker-type-modal">
+    <h5 class="custom-modal-header">
+      <i class="fas fa-map-pin"></i> Select Marker Type
+    </h5>
+    <div class="custom-modal-body">
+      <div class="marker-type-grid" id="markerTypeGrid">
+        <button class="marker-type-btn" data-category="items" data-icon="fa-box">
+          <i class="fas fa-box"></i>
+          <span>Item</span>
+        </button>
+        <button class="marker-type-btn" data-category="enemies" data-icon="fa-skull-crossbones">
+          <i class="fas fa-skull-crossbones"></i>
+          <span>Enemy</span>
+        </button>
+        <button class="marker-type-btn" data-category="locations" data-icon="fa-map-marker-alt">
+          <i class="fas fa-map-marker-alt"></i>
+          <span>Location</span>
+        </button>
+        <button class="marker-type-btn" data-category="npcs" data-icon="fa-user">
+          <i class="fas fa-user"></i>
+          <span>NPC</span>
+        </button>
+        <button class="marker-type-btn" data-category="items" data-icon="fa-key">
+          <i class="fas fa-key"></i>
+          <span>Key Item</span>
+        </button>
+        <button class="marker-type-btn" data-category="items" data-icon="fa-medkit">
+          <i class="fas fa-medkit"></i>
+          <span>Medical</span>
+        </button>
+        <button class="marker-type-btn" data-category="items" data-icon="fa-toolbox">
+          <i class="fas fa-toolbox"></i>
+          <span>Tool</span>
+        </button>
+        <button class="marker-type-btn" data-category="items" data-icon="fa-cubes">
+          <i class="fas fa-cubes"></i>
+          <span>Resource</span>
+        </button>
+        <button class="marker-type-btn" data-category="items" data-icon="fa-battery-half">
+          <i class="fas fa-battery-half"></i>
+          <span>Charging</span>
+        </button>
+        <button class="marker-type-btn" data-category="locations" data-icon="fa-plug">
+          <i class="fas fa-plug"></i>
+          <span>Outlet</span>
+        </button>
+        <button class="marker-type-btn" data-category="locations" data-icon="fa-door-open">
+          <i class="fas fa-door-open"></i>
+          <span>Door</span>
+        </button>
+        <button class="marker-type-btn" data-category="locations" data-icon="fa-sign-out-alt">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Exit</span>
+        </button>
+        <button class="marker-type-btn" data-category="locations" data-icon="fa-level-up-alt">
+          <i class="fas fa-level-up-alt"></i>
+          <span>Up Floor</span>
+        </button>
+        <button class="marker-type-btn" data-category="locations" data-icon="fa-exclamation-triangle">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span>Hazard</span>
+        </button>
+        <button class="marker-type-btn" data-category="locations" data-icon="fa-robot">
+          <i class="fas fa-robot"></i>
+          <span>Robot Portal</span>
+        </button>
+        <button class="marker-type-btn" data-category="npcs" data-icon="fa-shopping-cart">
+          <i class="fas fa-shopping-cart"></i>
+          <span>Vending Machine</span>
+        </button>
+        <button class="marker-type-btn" data-category="npcs" data-icon="fa-store">
+          <i class="fas fa-store"></i>
+          <span>Trader</span>
+        </button>
+        <button class="marker-type-btn" data-category="locations" data-icon="fa-font">
+          <i class="fas fa-font"></i>
+          <span>Text</span>
+        </button>
+        <button class="marker-type-btn" data-category="locations" data-icon="fa-info-circle">
+          <i class="fas fa-info-circle"></i>
+          <span>Note</span>
+        </button>
+      </div>
+    </div>
+    <div class="custom-modal-footer">
+      <button class="modal-btn modal-btn-secondary" id="markerTypeCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Marker Details Modal -->
+<div class="custom-modal" id="markerDetailsModal">
+  <div class="custom-modal-content">
+    <h5 class="custom-modal-header" id="markerDetailsHeader">
+      <i class="fas fa-map-pin"></i> Add Marker
+    </h5>
+    <div class="custom-modal-body">
+      <div class="mb-3">
+        <label class="form-label">Title</label>
+        <input type="text" id="markerTitle" class="form-control" placeholder="Enter marker title..." maxlength="50">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Description</label>
+        <textarea id="markerDescription" class="form-control" rows="3" placeholder="Enter marker description..." maxlength="200"></textarea>
+      </div>
+    </div>
+    <div class="custom-modal-footer">
+      <button class="modal-btn modal-btn-secondary" id="markerDetailsBack">Back</button>
+      <button class="modal-btn modal-btn-primary" id="markerDetailsConfirm">Add Marker</button>
+    </div>
+  </div>
+</div>

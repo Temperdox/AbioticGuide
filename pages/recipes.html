@@ -1,0 +1,109 @@
+<div class="container-fluid mt-4">
+  <div class="row">
+    <!-- LEFT COLUMN: Filters -->
+    <div class="col-lg-3 mb-3">
+      <div class="card filters-card sticky-top" style="top: 150px;">
+        <div class="card-header">
+          <h4 class="mb-0"><i class="fas fa-filter"></i> Filters</h4>
+        </div>
+        <div class="card-body">
+          <!-- Quick Filters -->
+          <div class="filter-section mb-3">
+            <div class="filter-label"><i class="fas fa-bolt"></i> Quick Filters</div>
+            <div class="filter-buttons-vertical">
+              <button class="filter-btn active" data-filter="all">All Recipes</button>
+              <button class="filter-btn" data-filter="pinned"><i class="fas fa-thumbtack"></i> Pinned</button>
+              <button class="filter-btn" data-filter="canMake"><i class="fas fa-check-circle"></i> Can Make</button>
+            </div>
+          </div>
+
+          <hr class="filter-divider">
+
+          <!-- Cooking Method Filters -->
+          <div class="filter-section mb-3">
+            <div class="filter-label"><i class="fas fa-fire"></i> Cooking Method</div>
+            <div class="filter-buttons-vertical">
+              <button class="method-btn" data-method="soup"><i class="fas fa-mug-hot"></i> Soups</button>
+              <button class="method-btn" data-method="frying"><i class="fas fa-utensils"></i> Frying</button>
+              <button class="method-btn" data-method="oven"><i class="fas fa-bread-slice"></i> Oven</button>
+            </div>
+          </div>
+
+          <hr class="filter-divider">
+
+          <!-- Buff Filters -->
+          <div class="filter-section">
+            <div class="filter-label"><i class="fas fa-star"></i> Filter by Buff</div>
+            <select class="form-select buff-select" id="buffFilter">
+              <option value="">All Buffs</option>
+              <option value="Souper Satisfied">Souper Satisfied</option>
+              <option value="Bodacious">Bodacious</option>
+              <option value="Heightened Senses">Heightened Senses</option>
+              <option value="Mega-Ante">Mega-Ante</option>
+              <option value="Quick Reflexes">Quick Reflexes</option>
+              <option value="Big Brain">Big Brain</option>
+              <option value="Brain Freeze">Brain Freeze</option>
+              <option value="Desire of the Flesh">Desire of the Flesh</option>
+              <option value="Lightfooted">Lightfooted</option>
+              <option value="Living Off the Land">Living Off the Land</option>
+              <option value="Rad Resistant">Rad Resistant</option>
+              <option value="Sweet Tooth">Sweet Tooth</option>
+              <option value="Sugar High">Sugar High</option>
+              <option value="Well Fed">Well Fed</option>
+              <option value="Energized">Energized</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTER COLUMN: Recipes List -->
+    <div class="col-lg-5 mb-3">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="mb-0"><i class="fas fa-book"></i> All Recipes</h4>
+        </div>
+        <div class="card-body" id="recipesContainer"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: Inventory & Search -->
+    <div class="col-lg-4 mb-3">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h4 class="mb-0"><i class="fas fa-warehouse"></i> My Inventory</h4>
+          <button class="btn btn-sm btn-danger" onclick="clearInventory()" title="Clear All Inventory">
+            <i class="fas fa-trash-alt"></i> Clear
+          </button>
+        </div>
+        <div class="card-body inventory-card-body">
+          <!-- Search Ingredients -->
+          <div class="search-section mb-3">
+            <h5><i class="fas fa-search"></i> Search Ingredients</h5>
+            <div class="position-relative">
+              <input type="text" class="form-control search-input" id="ingredientSearch"
+                     placeholder="Type to search ingredients...">
+              <div id="suggestions" class="suggestions-list" style="display: none;"></div>
+            </div>
+            <div class="mt-2">
+              <small class="text-muted">Click on ingredients to add them to your inventory</small>
+            </div>
+          </div>
+
+          <hr class="inventory-divider">
+
+          <!-- Inventory Items -->
+          <div class="inventory-items-section">
+            <h5><i class="fas fa-box"></i> Items</h5>
+            <div class="inventory-list" id="inventoryContainer">
+              <div class="empty-state">
+                <i class="fas fa-box-open"></i>
+                <p>Your inventory is empty<br><small>Search and add ingredients above</small></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
