@@ -115,9 +115,7 @@ const imageUrls = {
     "Glow Tulip": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Glow_Tulip.png/64px-Item_Icon_-_Glow_Tulip.png?778899",
     "Gooey Tulip": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Gooey_Tulip.png/64px-Item_Icon_-_Gooey_Tulip.png?998877",
     "Space Lettuce": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Space_Lettuce.png/64px-Item_Icon_-_Space_Lettuce.png?aabbdd",
-    "Super Tomato": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Super_Tomato.png/64px-Item_Icon_-_Super_Tomato.png?ddbbaa",
     "Crunchy Crystal": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Crunchy_Crystal.png/64px-Item_Icon_-_Crunchy_Crystal.png?eeffgg",
-    "Gem Crab": "https://abioticfactor.wiki.gg/images/thumb/Item_Icon_-_Gem_Crab.png/64px-Item_Icon_-_Gem_Crab.png?ggffee",
     "Any Raw Fish Filet": "https://abioticfactor.wiki.gg/images/thumb/Itemicon_filet_antefish_raw.png/64px-Itemicon_filet_antefish_raw.png?1f319e"
   },
   recipes: {}

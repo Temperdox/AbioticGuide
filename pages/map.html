@@ -37,8 +37,11 @@
         <button class="btn btn-sm btn-secondary w-100 mb-2" id="resetView">
           <i class="fas fa-sync-alt"></i> Reset View
         </button>
-        <button class="btn btn-sm btn-warning w-100" id="exportMarkers">
+        <button class="btn btn-sm btn-warning w-100 mb-2" id="exportMarkers">
           <i class="fas fa-download"></i> Save Markers to File
+        </button>
+        <button class="btn btn-sm btn-danger w-100" id="deleteAllMarkers">
+          <i class="fas fa-trash-alt"></i> Delete All Markers
         </button>
       </div>
     </div>
@@ -48,6 +51,26 @@
         <div id="interactive-map"></div>
         <div class="map-loading" id="mapLoading">
           <i class="fas fa-spinner fa-spin"></i> Loading map...
+        </div>
+        <!-- Undo/Redo Controls -->
+        <div class="map-undo-redo-controls">
+          <button class="map-control-btn" id="undoBtn" title="Undo (Ctrl+Z)" disabled>
+            <i class="fas fa-undo"></i>
+          </button>
+          <button class="map-control-btn" id="redoBtn" title="Redo (Ctrl+Y)" disabled>
+            <i class="fas fa-redo"></i>
+          </button>
+        </div>
+        <!-- Clear All Markers Button -->
+        <div class="map-clear-all-btn-container">
+          <button class="map-control-btn map-clear-all-btn" id="clearAllMapMarkersBtn" title="Clear All Markers">
+            <i class="fas fa-eraser"></i>
+          </button>
+        </div>
+        <!-- Minimap -->
+        <div class="minimap-container" id="minimapContainer">
+          <div class="minimap-header">Overview</div>
+          <div id="minimap"></div>
         </div>
       </div>
     </div>
@@ -59,8 +82,20 @@
   <button class="context-menu-item" data-action="add-marker">
     <i class="fas fa-map-pin"></i> Add Marker
   </button>
+  <button class="context-menu-item" data-action="add-to-group" id="addToGroupOption" style="display: none;">
+    <i class="fas fa-plus-circle"></i> Add Marker to Group
+  </button>
   <button class="context-menu-item danger" data-action="remove-marker" id="removeMarkerOption" style="display: none;">
     <i class="fas fa-trash-alt"></i> Remove This Marker
+  </button>
+  <button class="context-menu-item danger" data-action="remove-from-group" id="removeFromGroupOption" style="display: none;">
+    <i class="fas fa-minus-circle"></i> Remove Marker from Group
+  </button>
+  <button class="context-menu-item danger" data-action="delete-group" id="deleteGroupOption" style="display: none;">
+    <i class="fas fa-trash"></i> Delete Marker Group
+  </button>
+  <button class="context-menu-item" data-action="ungroup" id="ungroupOption" style="display: none;">
+    <i class="fas fa-object-ungroup"></i> Ungroup Markers
   </button>
   <div class="context-menu-separator"></div>
   <button class="context-menu-item" data-action="add-home">
@@ -106,86 +141,100 @@
     </h5>
     <div class="custom-modal-body">
       <div class="marker-type-grid" id="markerTypeGrid">
-        <button class="marker-type-btn" data-category="items" data-icon="fa-box">
+        <!-- Complex markers with category selection -->
+        <button class="marker-type-btn" data-category="items" data-icon="fa-box" data-type="complex">
           <i class="fas fa-box"></i>
-          <span>Item</span>
+          <span>Items</span>
         </button>
-        <button class="marker-type-btn" data-category="enemies" data-icon="fa-skull-crossbones">
-          <i class="fas fa-skull-crossbones"></i>
-          <span>Enemy</span>
+        <button class="marker-type-btn" data-category="items" data-icon="fa-utensils" data-type="complex">
+          <i class="fas fa-utensils"></i>
+          <span>Food</span>
         </button>
-        <button class="marker-type-btn" data-category="locations" data-icon="fa-map-marker-alt">
-          <i class="fas fa-map-marker-alt"></i>
-          <span>Location</span>
+        <button class="marker-type-btn" data-category="npcs" data-icon="fa-users" data-type="complex">
+          <i class="fas fa-users"></i>
+          <span>NPCs & Enemies</span>
         </button>
-        <button class="marker-type-btn" data-category="npcs" data-icon="fa-user">
-          <i class="fas fa-user"></i>
-          <span>NPC</span>
+        <button class="marker-type-btn" data-category="items" data-icon="fa-hammer" data-type="complex">
+          <i class="fas fa-hammer"></i>
+          <span>Base & Building</span>
         </button>
-        <button class="marker-type-btn" data-category="items" data-icon="fa-key">
-          <i class="fas fa-key"></i>
-          <span>Key Item</span>
+
+        <!-- Simple location markers -->
+        <button class="marker-type-btn" data-category="locations" data-icon="fa-robot" data-type="simple">
+          <i class="fas fa-robot"></i>
+          <span>Robot Station</span>
         </button>
-        <button class="marker-type-btn" data-category="items" data-icon="fa-medkit">
-          <i class="fas fa-medkit"></i>
-          <span>Medical</span>
-        </button>
-        <button class="marker-type-btn" data-category="items" data-icon="fa-toolbox">
-          <i class="fas fa-toolbox"></i>
-          <span>Tool</span>
-        </button>
-        <button class="marker-type-btn" data-category="items" data-icon="fa-cubes">
-          <i class="fas fa-cubes"></i>
-          <span>Resource</span>
-        </button>
-        <button class="marker-type-btn" data-category="items" data-icon="fa-battery-half">
+        <button class="marker-type-btn" data-category="items" data-icon="fa-battery-half" data-type="simple">
           <i class="fas fa-battery-half"></i>
           <span>Charging</span>
         </button>
-        <button class="marker-type-btn" data-category="locations" data-icon="fa-plug">
+        <button class="marker-type-btn" data-category="locations" data-icon="fa-plug" data-type="simple">
           <i class="fas fa-plug"></i>
           <span>Outlet</span>
         </button>
-        <button class="marker-type-btn" data-category="locations" data-icon="fa-door-open">
+        <button class="marker-type-btn" data-category="locations" data-icon="fa-door-open" data-type="simple">
           <i class="fas fa-door-open"></i>
           <span>Door</span>
         </button>
-        <button class="marker-type-btn" data-category="locations" data-icon="fa-sign-out-alt">
-          <i class="fas fa-sign-out-alt"></i>
-          <span>Exit</span>
+        <button class="marker-type-btn" data-category="locations" data-icon="fa-lock" data-type="simple">
+          <i class="fas fa-lock"></i>
+          <span>Doors (locked)</span>
         </button>
-        <button class="marker-type-btn" data-category="locations" data-icon="fa-level-up-alt">
+        <button class="marker-type-btn" data-category="locations" data-icon="fa-level-up-alt" data-type="simple">
           <i class="fas fa-level-up-alt"></i>
           <span>Up Floor</span>
         </button>
-        <button class="marker-type-btn" data-category="locations" data-icon="fa-exclamation-triangle">
-          <i class="fas fa-exclamation-triangle"></i>
-          <span>Hazard</span>
+        <button class="marker-type-btn" data-category="locations" data-icon="fa-level-down-alt" data-type="simple">
+          <i class="fas fa-level-down-alt"></i>
+          <span>Down Floor</span>
         </button>
-        <button class="marker-type-btn" data-category="locations" data-icon="fa-robot">
-          <i class="fas fa-robot"></i>
-          <span>Robot Portal</span>
-        </button>
-        <button class="marker-type-btn" data-category="npcs" data-icon="fa-shopping-cart">
-          <i class="fas fa-shopping-cart"></i>
-          <span>Vending Machine</span>
-        </button>
-        <button class="marker-type-btn" data-category="npcs" data-icon="fa-store">
-          <i class="fas fa-store"></i>
-          <span>Trader</span>
-        </button>
-        <button class="marker-type-btn" data-category="locations" data-icon="fa-font">
+        <button class="marker-type-btn" data-category="locations" data-icon="fa-font" data-type="simple">
           <i class="fas fa-font"></i>
           <span>Text</span>
         </button>
-        <button class="marker-type-btn" data-category="locations" data-icon="fa-info-circle">
-          <i class="fas fa-info-circle"></i>
+        <button class="marker-type-btn" data-category="locations" data-icon="fa-sticky-note" data-type="simple">
+          <i class="fas fa-sticky-note"></i>
           <span>Note</span>
+        </button>
+        <button class="marker-type-btn" data-category="npcs" data-icon="fa-shopping-cart" data-type="simple">
+          <i class="fas fa-shopping-cart"></i>
+          <span>Vending Machines</span>
+        </button>
+        <button class="marker-type-btn" data-category="locations" data-icon="fa-map-marker-alt" data-type="simple">
+          <i class="fas fa-map-marker-alt"></i>
+          <span>Locations</span>
         </button>
       </div>
     </div>
     <div class="custom-modal-footer">
       <button class="modal-btn modal-btn-secondary" id="markerTypeCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Preset Selection Modal (Searchable Items/Enemies) -->
+<div class="custom-modal" id="presetSelectionModal">
+  <div class="custom-modal-content preset-selection-modal">
+    <h5 class="custom-modal-header" id="presetSelectionHeader">
+      <i class="fas fa-search"></i> Select Item
+    </h5>
+    <div class="custom-modal-body">
+      <!-- Search Bar -->
+      <div class="preset-search-container mb-3">
+        <input type="text" id="presetSearch" class="form-control search-input" placeholder="Search...">
+        <i class="fas fa-search search-icon"></i>
+      </div>
+
+      <!-- Preset Grid -->
+      <div class="preset-grid" id="presetGrid">
+        <div class="preset-loading">
+          <i class="fas fa-spinner fa-spin"></i> Loading...
+        </div>
+      </div>
+    </div>
+    <div class="custom-modal-footer">
+      <button class="modal-btn modal-btn-secondary" id="presetSelectionBack">Back</button>
+      <button class="modal-btn modal-btn-secondary" id="presetSelectionCustom">Custom Marker</button>
     </div>
   </div>
 </div>
@@ -209,6 +258,201 @@
     <div class="custom-modal-footer">
       <button class="modal-btn modal-btn-secondary" id="markerDetailsBack">Back</button>
       <button class="modal-btn modal-btn-primary" id="markerDetailsConfirm">Add Marker</button>
+    </div>
+  </div>
+</div>
+
+<!-- Category Selection Modal -->
+<div class="custom-modal" id="categorySelectionModal">
+  <div class="custom-modal-content category-selection-modal">
+    <h5 class="custom-modal-header">
+      <i class="fas fa-th-large"></i> Select Items for Marker
+    </h5>
+    <div class="custom-modal-body">
+      <!-- Optional Marker Name -->
+      <div class="mb-3">
+        <label class="form-label">Marker Name (Optional)</label>
+        <input type="text" id="categoryMarkerName" class="form-control" placeholder="Enter custom marker name...">
+      </div>
+
+      <!-- Search Bar -->
+      <div class="preset-search-container mb-3">
+        <input type="text" id="categorySearch" class="form-control search-input" placeholder="Search items...">
+        <i class="fas fa-search search-icon"></i>
+      </div>
+
+      <!-- Category Tabs -->
+      <div class="category-tabs mb-3">
+        <button class="category-tab active" data-category="Base and Building">Base & Building</button>
+        <button class="category-tab" data-category="Food">Food</button>
+        <button class="category-tab" data-category="People and Enemies">People & Enemies</button>
+        <button class="category-tab" data-category="Utility and Travel">Utility & Travel</button>
+        <button class="category-tab" data-category="Weapons and Gear">Weapons & Gear</button>
+        <button class="category-tab" data-category="Resources">Resources</button>
+      </div>
+
+      <!-- Subcategory Tabs -->
+      <div class="subcategory-tabs mb-3" id="subcategoryTabs">
+        <!-- Dynamically populated based on selected category -->
+      </div>
+
+      <!-- Item List with Checkboxes -->
+      <div class="category-items-container">
+        <div class="category-items-grid" id="categoryItemsGrid">
+          <!-- Dynamically populated items -->
+        </div>
+      </div>
+    </div>
+    <div class="custom-modal-footer">
+      <button class="modal-btn modal-btn-secondary" id="categorySelectionCancel">Cancel</button>
+      <button class="modal-btn modal-btn-primary" id="categorySelectionOk">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- Item Info Modal (Draggable/Resizable) -->
+<div class="item-info-modal" id="itemInfoModal">
+  <div class="item-info-header">
+    <button class="item-info-pin" id="itemInfoPin" title="Pin modal">
+      <i class="fas fa-thumbtack"></i>
+    </button>
+    <div class="item-info-drag-handle" id="itemInfoDragHandle">
+      <i class="fas fa-grip-horizontal"></i>
+    </div>
+    <button class="item-info-close" id="itemInfoClose">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+  <div class="item-info-content">
+    <div class="item-info-body">
+      <div class="item-info-left">
+        <h4 class="item-info-title" id="itemInfoTitle">Item Name</h4>
+        <a href="#" class="item-info-wiki-link" id="itemInfoWikiLink" target="_blank" rel="noopener noreferrer">
+          <i class="fas fa-external-link-alt"></i> View on Wiki
+        </a>
+
+        <div class="item-info-section" id="itemInfoCategory">
+          <h6>Category</h6>
+          <p>-</p>
+        </div>
+
+        <div class="item-info-section" id="itemInfoLocation">
+          <h6>Location</h6>
+          <p>-</p>
+        </div>
+
+        <div class="item-info-section" id="itemInfoHarvestable">
+          <h6>Harvestable Drops</h6>
+          <ul></ul>
+        </div>
+
+        <div class="item-info-section" id="itemInfoDrops">
+          <h6>Drops</h6>
+          <ul></ul>
+        </div>
+
+        <div class="item-info-section" id="itemInfoScrap">
+          <h6>Scrap Result</h6>
+          <ul></ul>
+        </div>
+
+        <div class="item-info-section" id="itemInfoRecipe">
+          <h6>Recipe</h6>
+          <ul></ul>
+        </div>
+
+        <div class="item-info-section" id="itemInfoButchering">
+          <h6>Butchering</h6>
+          <ul></ul>
+        </div>
+
+        <div class="item-info-section" id="itemInfoTrades">
+          <h6>Trades</h6>
+          <ul></ul>
+        </div>
+
+        <div class="item-info-section" id="itemInfoDescription">
+          <h6>Description</h6>
+          <p>-</p>
+        </div>
+
+        <div class="item-info-section">
+          <h6>Notes</h6>
+          <textarea id="itemInfoNotes" class="item-info-notes" placeholder="Add your notes here..."></textarea>
+        </div>
+      </div>
+      <div class="item-info-right">
+        <div class="item-info-image-container">
+          <img id="itemInfoImage" class="item-info-image" src="" alt="Item image">
+          <button class="item-info-add-image" id="itemInfoAddImage">
+            <i class="fas fa-plus"></i> Add Image
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="item-info-resize-handle" id="itemInfoResizeHandle">
+    <i class="fas fa-grip-lines-diagonal"></i>
+  </div>
+</div>
+
+<!-- Marker Group View Modal -->
+<div class="custom-modal" id="markerGroupModal">
+  <div class="custom-modal-content marker-group-modal">
+    <h5 class="custom-modal-header">
+      <i class="fas fa-layer-group"></i> Marker Group
+    </h5>
+    <div class="custom-modal-body">
+      <div class="marker-group-container">
+        <div class="marker-group-tabs" id="markerGroupTabs">
+          <!-- Tabs will be dynamically populated -->
+        </div>
+        <div class="marker-group-content" id="markerGroupContent">
+          <!-- Content will be dynamically populated -->
+        </div>
+      </div>
+    </div>
+    <div class="custom-modal-footer">
+      <button class="modal-btn modal-btn-secondary" id="markerGroupClose">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Remove Markers from Group Modal -->
+<div class="custom-modal" id="removeMarkersModal">
+  <div class="custom-modal-content">
+    <h5 class="custom-modal-header">
+      <i class="fas fa-minus-circle"></i> Remove Markers from Group
+    </h5>
+    <div class="custom-modal-body">
+      <p style="margin-bottom: 1rem; color: rgba(255,255,255,0.8);">Select markers to remove:</p>
+      <div class="remove-markers-list" id="removeMarkersList">
+        <!-- Checkboxes will be dynamically populated -->
+      </div>
+    </div>
+    <div class="custom-modal-footer">
+      <button class="modal-btn modal-btn-secondary" id="removeMarkersCancel">Cancel</button>
+      <button class="modal-btn modal-btn-primary" id="removeMarkersConfirm">Remove Selected</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Global Confirmation Modal -->
+<div class="confirm-modal" id="confirmModal">
+  <div class="confirm-modal-content">
+    <div class="confirm-modal-header">
+      <i class="fas fa-exclamation-triangle confirm-modal-icon" id="confirmModalIcon"></i>
+      <h5 class="confirm-modal-title" id="confirmModalTitle">Confirm Action</h5>
+    </div>
+    <div class="confirm-modal-body" id="confirmModalBody">
+      Are you sure you want to proceed?
+    </div>
+    <div class="confirm-modal-footer">
+      <button class="modal-btn modal-btn-secondary" id="confirmModalCancel">Cancel</button>
+      <button class="modal-btn modal-btn-primary" id="confirmModalConfirm">Confirm</button>
     </div>
   </div>
 </div>

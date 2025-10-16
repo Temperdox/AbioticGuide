@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abiotic Factor Preset Data Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 20px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            background: white;
+            color: #2c3e50;
+            border: 2px solid #667eea;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .stats {
+            padding: 20px 30px;
+            background: #e8f4f8;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .results {
+            padding: 30px;
+            min-height: 400px;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .item-card {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .item-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .item-image {
+            width: 100%;
+            height: 150px;
+            object-fit: contain;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .item-name {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .item-category {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            margin-bottom: 8px;
+        }
+
+        .item-recipe {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .recipe-label {
+            font-weight: bold;
+            color: #2c3e50;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px;
+            color: #999;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Abiotic Factor Preset Data</h1>
+            <p class="subtitle">Interactive Data Explorer - 1,521 Items</p>
+        </header>
+
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search items by name...">
+                <button onclick="searchItems()">Search</button>
+                <button onclick="showAll()">Show All</button>
+            </div>
+            <div class="filter-buttons">
+                <button class="filter-btn" onclick="filterByCategory('Base and Building')">Base & Building</button>
+                <button class="filter-btn" onclick="filterByCategory('Food')">Food</button>
+                <button class="filter-btn" onclick="filterByCategory('People and Enemies')">People & Enemies</button>
+                <button class="filter-btn" onclick="filterByCategory('Utility and Travel')">Utility & Travel</button>
+                <button class="filter-btn" onclick="filterByCategory('Weapons and Gear')">Weapons & Gear</button>
+                <button class="filter-btn" onclick="filterByCategory('Resources')">Resources</button>
+                <button class="filter-btn" onclick="showCraftable()">Craftable Items</button>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="totalItems">0</div>
+                <div class="stat-label">Total Items</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="displayedItems">0</div>
+                <div class="stat-label">Displayed</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="craftableItems">0</div>
+                <div class="stat-label">Craftable</div>
+            </div>
+        </div>
+
+        <div class="results">
+            <div id="itemsContainer" class="loading">
+                Loading data...
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import {
+            abioticPresetData,
+            getItemsByCategory,
+            searchItems as searchItemsData,
+            getItemsWithRecipes
+        } from '../src/data/abiotic-preset-data.js';
+
+        // Make functions available globally
+        window.abioticData = abioticPresetData;
+        window.getItemsByCategory = getItemsByCategory;
+        window.searchItemsData = searchItemsData;
+        window.getItemsWithRecipes = getItemsWithRecipes;
+
+        // Calculate stats
+        let totalCount = 0;
+        let craftableCount = 0;
+
+        for (const category of Object.values(abioticPresetData)) {
+            for (const items of Object.values(category)) {
+                totalCount += items.length;
+                craftableCount += items.filter(item => item.Recipe && item.Recipe !== false).length;
+            }
+        }
+
+        document.getElementById('totalItems').textContent = totalCount.toLocaleString();
+        document.getElementById('craftableItems').textContent = craftableCount.toLocaleString();
+
+        // Display items function
+        window.displayItems = function(items) {
+            const container = document.getElementById('itemsContainer');
+            document.getElementById('displayedItems').textContent = items.length.toLocaleString();
+
+            if (items.length === 0) {
+                container.innerHTML = '<div class="no-results">No items found</div>';
+                return;
+            }
+
+            const html = items.map(item => `
+                <div class="item-card" onclick="openWiki('${item.link}')">
+                    <img src="${item.image}" alt="${item.item}" class="item-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23ddd%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22%3ENo Image%3C/text%3E%3C/svg%3E'">
+                    <div class="item-name">${item.item}</div>
+                    <span class="item-category">${item.category}</span>
+                    ${item.Recipe && item.Recipe !== false ? `
+                        <div class="item-recipe">
+                            <span class="recipe-label">Recipe:</span>
+                            ${formatRecipe(item.Recipe)}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+
+            container.innerHTML = `<div class="items-grid">${html}</div>`;
+        };
+
+        // Format recipe for display
+        function formatRecipe(recipe) {
+            if (!recipe || recipe.length === 0) return '';
+            const firstRecipe = recipe[0];
+            const ingredients = firstRecipe[0].join(', ');
+            return ingredients.substring(0, 60) + (ingredients.length > 60 ? '...' : '');
+        }
+
+        // Search function
+        window.searchItems = function() {
+            const query = document.getElementById('searchInput').value;
+            if (!query) {
+                showAll();
+                return;
+            }
+            const results = searchItemsData(query);
+            displayItems(results);
+            clearActiveFilters();
+        };
+
+        // Filter by category
+        window.filterByCategory = function(category) {
+            const items = getItemsByCategory(category);
+            displayItems(items);
+            setActiveFilter(event.target);
+        };
+
+        // Show all items
+        window.showAll = function() {
+            const allItems = [];
+            for (const category of Object.values(abioticPresetData)) {
+                for (const items of Object.values(category)) {
+                    allItems.push(...items);
+                }
+            }
+            displayItems(allItems);
+            clearActiveFilters();
+        };
+
+        // Show craftable items
+        window.showCraftable = function() {
+            const craftable = getItemsWithRecipes();
+            displayItems(craftable);
+            setActiveFilter(event.target);
+        };
+
+        // Open wiki link
+        window.openWiki = function(url) {
+            window.open(url, '_blank');
+        };
+
+        // Filter button management
+        function setActiveFilter(button) {
+            clearActiveFilters();
+            button.classList.add('active');
+        }
+
+        function clearActiveFilters() {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+        }
+
+        // Search on Enter key
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchItems();
+            }
+        });
+
+        // Show all items on load
+        showAll();
+    </script>
+</body>
+</html>

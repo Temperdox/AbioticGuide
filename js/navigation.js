@@ -73,8 +73,7 @@ async function loadPage(pageName) {
 
   try {
     const response = await fetch(`pages/${pageName}.html`);
-    const html = await response.text();
-    container.innerHTML = html;
+    container.innerHTML = await response.text();
 
     // Initialize page-specific functionality
     if (pageName === 'recipes' && typeof initRecipesPage === 'function') {

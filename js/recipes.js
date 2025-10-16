@@ -78,7 +78,7 @@ function parseSearchTerm(term) {
 function recipeMatchesTerm(recipe, term) {
   const { field, value, isNegated } = parseSearchTerm(term);
   const searchValue = value.toLowerCase();
-  let matches = false;
+  let matches;
 
   switch (field) {
     case 'name':
@@ -397,9 +397,8 @@ function updateQuantity(ingredient, delta) {
 }
 
 function setQuantity(ingredient, value) {
-  const qty = parseInt(value) || 0;
   // Keep items at 0 quantity instead of removing them
-  inventory[ingredient] = qty;
+  inventory[ingredient] = parseInt(value) || 0;
   setCookie('abioticInventory', inventory);
   renderInventory();
   renderRecipes();
